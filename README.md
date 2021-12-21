@@ -1,2 +1,0 @@
-# AyaanTraining
-Training Ayaan
