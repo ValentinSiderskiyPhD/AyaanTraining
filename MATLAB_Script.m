@@ -2,7 +2,8 @@ clc
 clear
 close all
 
-load('VVA Template 2022 Labchart 8 V2 VVA001 VR Data.mat')
+[filename] = uigetfile('*mat');
+load(filename)
 
 m = 1; % data ranges in ticktimes
 p = 1; % experiment plotting loop variable
@@ -17,7 +18,6 @@ times = ticktimes_block1;
 
 namevar = 2; % loop var
 name = comtext_block1(namevar,1:14); % Experiment name in window
-
 
 titles = titles_block1(channel_select,:); % MCA, MP, ECG, etc.
 titlevar = 1;
@@ -40,12 +40,11 @@ while p <= n % plots each test
     end
     
     %add any extra subplots here
+
     bpmca = data(2,a:b) - data(1,a:b);
     subplot(n+1,1,n+1);
     plot(bpmca)
     title("BP MCA Latency")
-    
-    
     
     titlevar = 1;
     p = p + 1;
