@@ -2,10 +2,10 @@ clc
 clear
 close all
 
-[filename] = uigetfile('*mat');
-load(filename)
+%[filename] = uigetfile('*mat');
+%load(filename)
 
-%load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data")
+load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data")
 
 m = 1; % data ranges in ticktimes
 p = 1; % experiment plotting loop variable
@@ -14,6 +14,9 @@ channel_select = [1 2 3 5 6 7];
 
 data = data_block1(channel_select,:);
 [n, w] = size(data);
+
+
+%40/(max(data(6,a:b)) - min(data(6,a:b)));
 
 tickblock = comtick_block1;
 times = ticktimes_block1;
@@ -27,6 +30,8 @@ titlevar = 1;
 % 1000 ticks = 1 second
 
 extraplots = 2;
+
+v = [0,0];
 
 %% Graphs Each Experiment
 %p = n; % activate this line to only display the graph from experiment #p. testing only. 
@@ -53,9 +58,9 @@ while p <= n % plots each test
     end    
 
     %add extra subplots here
-
+    
     %Tilt Plate Chair Difference
-    relativeoffset = (data(5,a:b) + data(6,a:b));
+    relativeoffset = abs(data(5,a:b) + data(6,a:b));
     subplot(n+extraplots,1,i+1);
     plot(relativeoffset)
     title("Relative Offset Between Tilt Plate and Chair")
@@ -68,6 +73,8 @@ while p <= n % plots each test
     p = p + 1;
     namevar = namevar + 3; %Updates each title
     name = comtext_block1(namevar,1:14); 
+    
+
 
 end
 
@@ -80,7 +87,7 @@ function heartrateplot(ekg,n,extraplots)
 o1 = size(xp,2);
 v = [0,0]; % set containing every bpm calculated between peak distances
 
-for o = 1:(o1-1)
+for o = 1:(o1-1);
     v(1,o) = xp(o+1)-xp(o);
     v(1,o) = (v(1,o))^-1 * 1000 * 60; % turns peak distances into bpm 
 end
