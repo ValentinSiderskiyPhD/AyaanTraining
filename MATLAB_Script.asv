@@ -2,8 +2,7 @@ clc
 clear
 close all
 
-
-function()
+%{
 [filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat data.");
 
 if filepath == 0
@@ -11,16 +10,18 @@ if filepath == 0
 end
 
 load(fullfile(filepath,filename));
+%}
 
 load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
+
 
 channel_select = [1 2 3 5 6 7];
 
 data = data_block1(channel_select,:);
 [n, w] = size(data);
 
-tickblock = comtick_block1; % identifies experiment names
-times = ticktimes_block1; % identifies experiment data ranges
+ticknames = comtick_block1; % identifies experiment names
+ticktimes = ticktimes_block1 / 1000; % x axis var
 m = 1; % data ranges in ticktimes
 p = 1; % experiment plotting loop variable
 namevar = 2; % loop var
@@ -46,13 +47,15 @@ data(6,:) = cchairpos;
 extraplots = 1;
 
 while p <= n % plots each test
-    a = tickblock(m,1); % lower experiment data range
-    b = tickblock(m+2,1); % upper experiment data range
+    a = ticknames(m,1); % lower experiment data range
+    b = ticknames(m+2,1); % upper experiment data range
+    %aa = a/1000
+    %bb = b/1000
     m = m + 3;
     figure("Name",name);
     for i = 1:n % plots each graph in test
         subplot(n+extraplots,1,i);
-        plot(data(i,a:b))
+        plot(ticktimes(1,a:b),data(i,a:b))
         title(titles(titlevar,:),'interpreter', 'none');
         titlevar = titlevar + 1;
     end
@@ -104,13 +107,27 @@ end
 
 function heartmcabp(va)
 
-%Pa = %arterial flow
-p = .997538; % g/mL
-g = 9.81; % m/s^2
-ha = 14 * 0.0254; % m (from in)
+% Input variables
+pivotpt = 50;
+handmidline = 20;
+heartfromfinger = 16;
+mcafromfinger = 42;
 
-%mcabp = Pa + p*g*ha + .5 * p * va^2
+% Defining angles
+thetaR = cchairpos;
+thetaH = tan^-1(handmidline/pivotpt);
+thetaX = 90 - thetaR - thetaH;
+
+% Getting Heights
+anglefactor = sin(thetaX)/cos(thetaH);
+heartheight = (x-heartfromfinger) * anglefactor;
+mcaheight = (x-mcafromfinger) * anglefactor;
+
 subplot(n+extraplots,1,n+extraplots);
-plot(mcabp)
-title("MCA BP")
+plot(heartheight)
+title("Heart Height from Finger as a Function of Time")
+
+subplot(n+extraplots,1,n+extraplots);
+plot(mcaheight)
+title("MCA Height from Finger as a Function of Time")
 end
