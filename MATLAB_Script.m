@@ -2,11 +2,19 @@ clc
 clear
 close all
 
-[filename] = uigetfile('*mat');
-addpath(filename)
-load(filename)
+%{
+[filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat data.");
 
-%load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
+if filepath == 0
+    error("No data selected.");
+end
+
+load(fullfile(filepath,filename));
+%}
+
+load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
+
+
 
 channel_select = [1 2 3 5 6 7];
 
@@ -20,10 +28,12 @@ p = 1; % experiment plotting loop variable
 namevar = 2; % loop var
 name = comtext_block1(namevar,1:14); % Experiment name in window
 
-titles = titles_block1(channel_select,:); % MCA, MP, ECG, etc.
+%titles = titles_block1(channel_select,:); % MCA, MP, ECG, etc.
 titlevar = 1;
+titles = ["MCA (cm/s)";"BP (mmHg) ";"ECG       "; "CO2 (mmHg)"; "Plate Deg"; "Chair Deg "]; % Fixing Titles
 
 % 1000 ticks = 1 second
+
 
 %correcting for DC bias in channel 6
 cchairpos = (data(6,:) - 2.49895)*(20/15 * 2.08229 - 2.49895) * 100;
@@ -35,7 +45,7 @@ data(6,:) = cchairpos;
 %% Graphs Each Experiment
 
 %p = n; % activate this line to only display the graph from experiment #p. testing only. 
-extraplots = 2;
+extraplots = 1;
 
 while p <= n % plots each test
     a = tickblock(m,1); % lower experiment data range
@@ -89,7 +99,7 @@ end
 xpp = xp(:,1:(size(xp,2)-1)); % makes sure the sets are the same length
 subplot(n+extraplots,1,n+extraplots);
 plot(xpp,v)
-title("Heart Rate")
+title("Heart Rate (BPM)")
 end
 
 
