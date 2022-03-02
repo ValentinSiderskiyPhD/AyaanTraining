@@ -44,7 +44,7 @@ data(6,:) = cchairpos;
 %% Graphs Each Experiment
 
 %p = n; % activate this line to only display the graph from experiment #p. testing only. 
-extraplots = 1;
+extraplots = 3;
 
 while p <= n % plots each test
     a = ticknames(m,1); % lower experiment data range
@@ -76,8 +76,9 @@ while p <= n % plots each test
     ekg = data(3,a:b);
     heartrateplot(ekg,n,extraplots)
 
-    %MCA Adj. BP
-    va = data(1,a:b);
+    %Adj. BP
+    ccchairpos = cchairpos(1,a:b);
+    heartmcabp(ccchairpos(1,:),n,extraplots)
 
     
 
@@ -98,14 +99,14 @@ for o = 1:(o1-1) % makes a set v that contains bpm calculated between peak dista
 end
 
 xpp = xp(:,1:(size(xp,2)-1)); % makes sure the sets are the same length
-subplot(n+extraplots,1,n+extraplots);
+subplot(n+extraplots,1,n+extraplots-2);
 plot(xpp,v)
 title("Heart Rate (BPM)")
 end
 
 
 
-function heartmcabp(cchairpos)
+function heartmcabp(ccchairpos,n,extraplots)
 
 % Input variables
 pivotpt = 50;
@@ -114,20 +115,21 @@ heartfromfinger = 16;
 mcafromfinger = 42;
 
 % Defining angles
-thetaR = cchairpos;
-thetaH = tan^-1(handmidline/pivotpt);
+thetaR = ccchairpos(1,:);
+thetaH = atand(handmidline/pivotpt);
 thetaX = 90 - thetaR - thetaH;
 
 % Getting Heights
-anglefactor = sin(thetaX)/cos(thetaH);
-heartheight = (x-heartfromfinger) * anglefactor;
-mcaheight = (x-mcafromfinger) * anglefactor;
+%anglefactor = sin(thetaX)/cos(thetaH);
+vertmcatofinger = sqrt(handmidline^2+mcafromfinger^2)*sind(90-thetaR-acosd(mcafromfinger / sqrt(handmidline^2+mcafromfinger^2) ));
+verthearttofinger = sqrt(handmidline^2+heartfromfinger^2)*sind(90-thetaR-acosd(heartfromfinger / sqrt(handmidline^2+heartfromfinger^2) ));
 
-subplot(n+extraplots,1,n+extraplots);
-plot(heartheight)
+
+subplot(n+extraplots,1,n+extraplots-1);
+plot(verthearttofinger)
 title("Heart Height from Finger as a Function of Time")
 
 subplot(n+extraplots,1,n+extraplots);
-plot(mcaheight)
+plot(vertmcatofinger)
 title("MCA Height from Finger as a Function of Time")
 end

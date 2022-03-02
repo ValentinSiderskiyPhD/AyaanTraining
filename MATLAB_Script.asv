@@ -2,7 +2,7 @@ clc
 clear
 close all
 
-%{
+%%{
 [filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat data.");
 
 if filepath == 0
@@ -12,7 +12,7 @@ end
 load(fullfile(filepath,filename));
 %}
 
-load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
+%load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
 
 
 channel_select = [1 2 3 5 6 7];
@@ -105,7 +105,7 @@ end
 
 
 
-function heartmcabp(va)
+function heartmcabp(cchairpos)
 
 % Input variables
 pivotpt = 50;
@@ -120,14 +120,15 @@ thetaX = 90 - thetaR - thetaH;
 
 % Getting Heights
 anglefactor = sin(thetaX)/cos(thetaH);
-heartheight = (x-heartfromfinger) * anglefactor;
-mcaheight = (x-mcafromfinger) * anglefactor;
+vertmcatofinger = sqrt(handmidline^2+mcafromfinger^2)*sind(90-thetaR-acosd(mcafromfinger / sqrt(handmidline^2+mcafromfinger^2) ));
+verthearttofinger = = sqrt(handmidline^2+heartfromfinger^2)*sind(90-thetaR-acosd(heartfromfinger / sqrt(handmidline^2+heartfromfinger^2) ));
+
 
 subplot(n+extraplots,1,n+extraplots);
-plot(heartheight)
+plot(verthearttofinger)
 title("Heart Height from Finger as a Function of Time")
 
 subplot(n+extraplots,1,n+extraplots);
-plot(mcaheight)
+plot(vertmcatofinger)
 title("MCA Height from Finger as a Function of Time")
 end
