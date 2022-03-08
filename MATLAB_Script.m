@@ -2,17 +2,16 @@ clc
 clear
 close all
 
-%%{
-[filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat data.");
+%{
+[filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat
+data.");
 
-if filepath == 0
-    error("No data selected.");
-end
+if filepath == 0 error("No data selected."); end
 
 load(fullfile(filepath,filename));
 %}
 
-%load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
+load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
 
 
 channel_select = [1 2 3 5 6 7];
@@ -21,7 +20,7 @@ data = data_block1(channel_select,:);
 [n, w] = size(data);
 
 ticknames = comtick_block1; % identifies experiment names
-ticktimes = ticktimes_block1 / 1000; % x axis var
+ticktimes = ticktimes_block1; % x axis var
 m = 1; % data ranges in ticktimes
 p = 1; % experiment plotting loop variable
 namevar = 2; % loop var
@@ -38,24 +37,25 @@ titles = ["MCA (cm/s)";"BP (mmHg) ";"ECG       "; "CO2 (mmHg)"; "Plate Deg"; "Ch
 cchairpos = (data(6,:) - 2.49895)*(20/15 * 2.08229 - 2.49895) * 100;
 data(6,:) = cchairpos;
 
-%correctedplate = (data(5,:) - 2.49895);
-%data(5,:) = correctedplate;
+%correctedplate = (data(5,:) - 2.49895); data(5,:) = correctedplate;
 
 %% Graphs Each Experiment
 
-%p = n; % activate this line to only display the graph from experiment #p. testing only. 
+%p = n; % activate this line to only display the graph from experiment #p.
+%testing only.
 extraplots = 3;
 
 while p <= n % plots each test
     a = ticknames(m,1); % lower experiment data range
     b = ticknames(m+2,1); % upper experiment data range
-    %aa = a/1000
-    %bb = b/1000
+    %aa = a/1000 bb = b/1000
     m = m + 3;
     figure("Name",name);
     for i = 1:n % plots each graph in test
         subplot(n+extraplots,1,i);
-        plot(ticktimes(1,a:b),data(i,a:b))
+        adjticktimes(1,a:b) = ticktimes(1,a:b) - ticktimes(1,a);
+        plot(adjticktimes(1,a:b),data(i,a:b))
+        xlim([adjticktimes(a) adjticktimes(b)]);
         title(titles(titlevar,:),'interpreter', 'none');
         titlevar = titlevar + 1;
     end
@@ -66,10 +66,8 @@ while p <= n % plots each test
 
 %add extra subplots here
 
-    %Tilt Plate Chair Difference
-    %relativeoffset = (data(5,a:b) + data(6,a:b));
-    %subplot(n+extraplots,1,i);
-    %plot(relativeoffset)
+    %Tilt Plate Chair Difference relativeoffset = (data(5,a:b) +
+    %data(6,a:b)); subplot(n+extraplots,1,i); plot(relativeoffset)
     %title("Relative Offset Between Tilt Plate and Chair")
 
     %Heart Rate Plot
@@ -77,8 +75,9 @@ while p <= n % plots each test
     heartrateplot(ekg,n,extraplots)
 
     %Adj. BP
+    bp = data(2,a:b);
     ccchairpos = cchairpos(1,a:b);
-    heartmcabp(ccchairpos(1,:),n,extraplots)
+    heartmcabp(bp(1,:),ccchairpos(1,:),n,extraplots)
 
     
 
@@ -106,7 +105,10 @@ end
 
 
 
-function heartmcabp(ccchairpos,n,extraplots)
+function heartmcabp(bp,ccchairpos,n,extraplots)
+
+p = .997538; % g/mL
+g = 9.81; % m/s^2
 
 % Input variables
 pivotpt = 50;
@@ -117,12 +119,19 @@ mcafromfinger = 42;
 % Defining angles
 thetaR = ccchairpos(1,:);
 thetaH = atand(handmidline/pivotpt);
-thetaX = 90 - thetaR - thetaH;
+%thetaX = 90 - thetaR - thetaH;
 
 % Getting Heights
 %anglefactor = sin(thetaX)/cos(thetaH);
-vertmcatofinger = sqrt(handmidline^2+mcafromfinger^2)*sind(90-thetaR-acosd(mcafromfinger / sqrt(handmidline^2+mcafromfinger^2) ));
-verthearttofinger = sqrt(handmidline^2+heartfromfinger^2)*sind(90-thetaR-acosd(heartfromfinger / sqrt(handmidline^2+heartfromfinger^2) ));
+vertmcatofinger = 1/100*sqrt(handmidline^2+mcafromfinger^2)*sind(90-thetaR-acosd(mcafromfinger / sqrt(handmidline^2+mcafromfinger^2) ));
+verthearttofinger = 1/100*sqrt(handmidline^2+heartfromfinger^2)*sind(90-thetaR-acosd(heartfromfinger / sqrt(handmidline^2+heartfromfinger^2) ));
+
+
+MCApghtommhg = (133*10^9)^-1 * p * g * vertmcatofinger;
+vertmcatofinger = bp - MCApghtommhg;
+
+HEARTpghtommhg = (133*10^9)^-1 * p * g * verthearttofinger;
+verthearttofinger = bp - HEARTpghtommhg;
 
 
 subplot(n+extraplots,1,n+extraplots-1);
