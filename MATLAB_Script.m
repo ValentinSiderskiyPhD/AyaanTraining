@@ -2,16 +2,15 @@ clc
 clear
 close all
 
-%{
-[filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat
-data.");
+%%{
+[filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat data.");
 
 if filepath == 0 error("No data selected."); end
 
 load(fullfile(filepath,filename));
 %}
 
-load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
+%load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
 
 
 channel_select = [1 2 3 5 6 7];
@@ -41,8 +40,7 @@ data(6,:) = cchairpos;
 
 %% Graphs Each Experiment
 
-%p = n; % activate this line to only display the graph from experiment #p.
-%testing only.
+%p = n; % activate this line to only display the graph from experiment #p. testing only.
 extraplots = 3;
 
 while p <= n % plots each test
@@ -75,9 +73,10 @@ while p <= n % plots each test
     heartrateplot(ekg,n,extraplots)
 
     %Adj. BP
+    adjtt = adjticktimes(1,a:b);
     bp = data(2,a:b);
     ccchairpos = cchairpos(1,a:b);
-    heartmcabp(bp(1,:),ccchairpos(1,:),n,extraplots)
+    heartmcabp(bp(1,:),adjtt(1,:),ccchairpos(1,:),n,extraplots)
 
     
 
@@ -105,40 +104,36 @@ end
 
 
 
-function heartmcabp(bp,ccchairpos,n,extraplots)
-
+function heartmcabp(bp,adjtt,ccchairpos,n,extraplots)
+% Input variables
+%pivotpt = ;
 p = .997538; % g/mL
 g = 9.81; % m/s^2
 
-% Input variables
-pivotpt = 50;
-handmidline = 20;
-heartfromfinger = 16;
-mcafromfinger = 42;
+FM = 20;
+HM = 16; % Heart to where the finger is on the midline
+MM = 42; % MCA to where the finger is on the midline
 
-% Defining angles
+HF = hypot(HM,FM); % necessary hypotenuse
+MF = hypot(MM,FM);
+
 thetaR = ccchairpos(1,:);
-thetaH = atand(handmidline/pivotpt);
-%thetaX = 90 - thetaR - thetaH;
+thetaDH = acosd(HM/HF);
+thetaDM = acosd(MM/MF);
 
-% Getting Heights
-%anglefactor = sin(thetaX)/cos(thetaH);
-vertmcatofinger = 1/100*sqrt(handmidline^2+mcafromfinger^2)*sind(90-thetaR-acosd(mcafromfinger / sqrt(handmidline^2+mcafromfinger^2) ));
-verthearttofinger = 1/100*sqrt(handmidline^2+heartfromfinger^2)*sind(90-thetaR-acosd(heartfromfinger / sqrt(handmidline^2+heartfromfinger^2) ));
+% Height Calculations
+hheart = HF*sind(90 - thetaDH - thetaR)*10^-2; 
+hMCA = MF*sind(90 - thetaDM - thetaR)*10^-2;
 
-
-MCApghtommhg = (133*10^9)^-1 * p * g * vertmcatofinger;
-vertmcatofinger = bp - MCApghtommhg;
-
-HEARTpghtommhg = (133*10^9)^-1 * p * g * verthearttofinger;
-verthearttofinger = bp - HEARTpghtommhg;
-
+% Adjusted BP
+adjHeart = bp(1,:) - p * g * hheart / (133.322 * 10^9);
+adjMCA = bp(1,:) - p * g * hMCA / (133.322 * 10^9);
 
 subplot(n+extraplots,1,n+extraplots-1);
-plot(verthearttofinger)
-title("Heart Height from Finger as a Function of Time")
+plot(adjtt,adjHeart)
+title("Heart BP")
 
 subplot(n+extraplots,1,n+extraplots);
-plot(vertmcatofinger)
-title("MCA Height from Finger as a Function of Time")
+plot(adjtt,adjMCA)
+title("MCA BP")
 end
