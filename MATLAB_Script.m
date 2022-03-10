@@ -110,29 +110,27 @@ function heartmcabp(bp,adjtt,ccchairpos,n,extraplots)
 p = .997538; % g/mL
 g = 9.81; % m/s^2
 
-FM = 20;
-HM = 16; % Heart to where the finger is on the midline
-MM = 42; % MCA to where the finger is on the midline
+FM = .20;
+HM = .16; % Heart to where the finger is on the midline
+MM = .42; % MCA to where the finger is on the midline
 
-HF = hypot(HM,FM); % necessary hypotenuse
+HF = hypot(HM,FM);
 MF = hypot(MM,FM);
 
 thetaR = ccchairpos(1,:);
+
+% Heart BP
 thetaDH = acosd(HM/HF);
-thetaDM = acosd(MM/MF);
-
-% Height Calculations
-hheart = HF*sind(90 - thetaDH - thetaR)*10^-2; 
-hMCA = MF*sind(90 - thetaDM - thetaR)*10^-2;
-
-% Adjusted BP
-adjHeart = bp(1,:) - p * g * hheart / (133.322 * 10^9);
-adjMCA = bp(1,:) - p * g * hMCA / (133.322 * 10^9);
-
+h = HF*sind(90 - thetaDH - thetaR); 
+adjHeart = bp(1,:) - p * g * h * 10^3 * 1/133.322;
 subplot(n+extraplots,1,n+extraplots-1);
 plot(adjtt,adjHeart)
 title("Heart BP")
 
+% MCA BP
+thetaDM = acosd(MM/MF);
+h = MF*sind(90 - thetaDM - thetaR);
+adjMCA = bp(1,:) - p * g * h * 10^3 * 1/133.322;
 subplot(n+extraplots,1,n+extraplots);
 plot(adjtt,adjMCA)
 title("MCA BP")
