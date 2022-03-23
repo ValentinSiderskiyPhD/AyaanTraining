@@ -2,7 +2,7 @@ clc
 clear
 close all
 
-%%{
+%{
 [filename, filepath] = uigetfile('.mat',"Please open the VVA Script .mat data.");
 
 if filepath == 0 error("No data selected."); end
@@ -10,16 +10,17 @@ if filepath == 0 error("No data selected."); end
 load(fullfile(filepath,filename));
 %}
 
-%load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
-channel_select = [1 2 3 5 6 7]; % Skips the empty channel 4. 
+load("VVA Template 2022 Labchart 8 V2 VVA001 VR Data");
+channel_select = [1 2 3 5 6 7];
 data = data_block1(channel_select,:);
 [Number_Of_Measurements, w] = size(data);
 
-%% Pressure at the Heart and MCA. Type the distances below in meters OR centimeters. 
-
+%% Pressure at the Heart and MCA
+% Type the distances below in centimeters. 
 fm = 20; % Distance from finger to the midline
 hm = 16; % Heart to where the finger is on the midline
 mm = 42; % MCA to where the finger is on the midline
+
 [FM, HM, MM] = MeterAssurity(fm,hm,mm);
 
 rho = .997538; % Blood Density in g/mL
@@ -29,7 +30,7 @@ ticknames = comtick_block1; % identifies experiment names
 ticktimes = ticktimes_block1; % x axis var
 titles = ["MCA (cm/s)";"BP (mmHg) ";"ECG       "; "CO2 (mmHg)"; "Plate Deg"; "Chair Deg "]; % fixing titles
 
-chairpos = (data(6,:) - 2.49895)*(20/15 * 2.08229 - 2.49895) * 100; % Correcting for DC bias in channel 6. 
+chairpos = (data(6,:) - 2.49895)*(20/15 * 2.08229 - 2.49895) * 100; % Correcting for DC bias in channel 6
 thetaR = chairpos; % see writeup for context on what thetaR is
 bp = data(2,:);
 [P_Heart, P_MCA] = heartmcabp(bp,thetaR,FM,HM,MM,rho,g);
@@ -37,36 +38,19 @@ bp = data(2,:);
 
 %% Graphs Each Experiment
 %1 = Number_Of_Experiments; % activate this line to only display the graph from experiment #1. testing only.
-
 Context = comtext_block1;
-[Number_Of_Experiments] = size(Context)/3; % Assumes experiment end and beginnings were properly recorded. 
+[Number_Of_Experiments] = size(Context)/3; % Assumes experiment end and beginnings were properly recorded
 Experiment_Plotting(Number_Of_Measurements,Number_Of_Experiments,ticknames,ticktimes,titles,Context,data)
 
 %% Heart Rate Plot
-
 ekg = data(3,:);
 [Heart_Rate] = heartrate(ekg);
-
 
 %% 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 %% Heart Rate Generator
-
 function [Heart_Rate] = heartrate(ekg)
 
 [~, Prominent_Peaks] = findpeaks(ekg,"MinPeakProminence",140);
@@ -82,9 +66,7 @@ end
 end
 
 %% Pressure at MCA and Heart Given Finger BP, Chair Angle, and Relevant Distances
-
 function [P_Heart, P_MCA] = heartmcabp(bp,thetaR,FM,HM,MM,rho,g)
-
 HF = hypot(HM,FM);
 MF = hypot(MM,FM);
 
@@ -100,9 +82,7 @@ h = MF*sind(90 - thetaDM - thetaR);
 end
 
 %% Experiment Plotting Function
-
 function Experiment_Plotting(Number_Of_Measurements,Number_Of_Experiments,ticknames,ticktimes,titles,Context,data)
-
 m = 1; % data ranges in ticktimes
 namevar = 2; % name loop var
 [~, ContextSize] = size(Context);
@@ -127,10 +107,8 @@ for p = 1:Number_Of_Experiments % plots each experiment
 end
 end
 
-%% Meter Assurity Function. Assures distances are in meters, just in case they're typed in CM. 
-
+%% Meter Assurity Function. Assures input distances are in centimeters, just in case they're in meters. 
 function [FM, HM, MM] = MeterAssurity(fm,hm,mm)
-
 if fm > 2
     FM = fm/100;
 else
@@ -145,8 +123,3 @@ end
 
 if mm > 2
     MM = mm/100;
-else
-    MM = mm;
-end
-
-end
